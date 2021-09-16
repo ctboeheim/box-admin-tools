@@ -3,19 +3,11 @@
 // Log into Box and fire off a request for a Collaboration report
 
 const { chromium } = require('playwright');
-const { exec } = require('child_process');
+const { execSync } = require('child_process');
 
-var cred;
+const cred = JSON.parse(execSync('/csm/scripts/cred boxmanager'));
 
-// Get credentials from a credential manager.
-
-exec('/csm/scripts/cred boxmanager', (err, stdout, stderr) => {
-  if (err) {
-    console.error('Cannot get credential: %s', stderr);
-    process.exit;
-  }
-  cred = JSON.parse(stdout);
-});
+process.exit;
 
 // Launch the browser
 
@@ -36,12 +28,12 @@ exec('/csm/scripts/cred boxmanager', (err, stdout, stderr) => {
   ]);
 
   // Site-specific login, will vary depending on your SSO screen.
-  await page.fill('input[name="netid"]', cred.username);
-  await page.fill('input[name="password"]', cred.password);
+  await page.fill('input[id="username"]', cred.username);
+  await page.fill('input[id="password"]', cred.password);
 
   await Promise.all([
     page.waitForNavigation(),
-    page.click('input[alt="Login"]')
+    page.click('input[value="Login"]')
   ]);
 
   // The user should have its Box home page set to the Admin console.
@@ -54,7 +46,7 @@ exec('/csm/scripts/cred boxmanager', (err, stdout, stderr) => {
 
   await Promise.all([
     page.waitForNavigation(),
-    page.click('button:has-text("Export")')
+    page.click('div.modal-actions button.btn-primary')
   ]);
 
   // ---------------------
